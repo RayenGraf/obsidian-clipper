@@ -158,6 +158,11 @@ const debouncedUpdateContextMenu = debounce(async (tabId: number) => {
 			contexts: browser.Menus.ContextType[];
 		}[] = [
 				{
+					id: "clip-this-frame",
+					title: "Clip this frame",
+					contexts: ["frame"]  // Show only in context of frames
+				},
+				{
 					id: "open-obsidian-clipper",
 					title: "Clip this page",
 					contexts: ["page", "selection", "image", "video", "audio"]
@@ -200,6 +205,17 @@ const debouncedUpdateContextMenu = debounce(async (tabId: number) => {
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
 	if (info.menuItemId === "open-obsidian-clipper") {
+		browser.action.openPopup();
+	} else if (info.menuItemId === "clip-this-frame") {
+		// Create a new tab
+		const newTab = await browser.tabs.create({
+			url: info.frameUrl,
+			active: true,
+		});
+
+		// Firefox - enable open popup without user gesture
+		// open in the URL bar: about:config
+		// extensions.openPopupWithoutUserGesture.enabled = true
 		browser.action.openPopup();
 	} else if (info.menuItemId === "enter-highlighter" && tab && tab.id) {
 		await setHighlighterMode(tab.id, true);
